@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>The Creative Co. | Müşteri Paneli</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+
+        :root {
+            --bg:#f0f4f8; --card:#fff; --sb:#1e293b; --sb2:#0f172a;
+            --acc:#3b82f6; --txt:#1e293b; --txt2:#475569; --txt3:#94a3b8;
+            --bdr:#f1f5f9; --grn:#10b981; --red:#ef4444; --amb:#f59e0b;
+            --sh:0 2px 14px rgba(0,0,0,.07);
+            --fn:'DM Sans', system-ui, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: var(--fn); background: var(--bg); color: var(--txt); overflow-x: hidden; }
+
+        /* GİRİŞ EKRANI */
+        .login-screen {
+            position: fixed; inset: 0; background: linear-gradient(135deg, var(--sb), var(--sb2));
+            z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .login-box {
+            background: #fff; border-radius: 20px; padding: 40px; width: 100%; max-width: 380px;
+            box-shadow: 0 30px 80px rgba(0,0,0,.3); text-align: center;
+        }
+        .login-logo-icon {
+            width: 60px; height: 60px; border-radius: 16px; background: linear-gradient(135deg,#2563eb,#60a5fa);
+            display: inline-flex; align-items: center; justify-content: center; margin-bottom: 15px;
+        }
+        .login-box h2 { font-weight: 800; letter-spacing: -1px; margin-bottom: 5px; }
+        .login-box p { font-size: 13px; color: var(--txt3); margin-bottom: 25px; }
+        .fg { text-align: left; margin-bottom: 15px; }
+        .fg label { display: block; font-size: 12px; font-weight: 700; color: var(--txt2); margin-bottom: 5px; }
+        .fg input {
+            width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+            outline: none; font-family: var(--fn); transition: 0.2s; font-size: 16px;
+        }
+        .fg input:focus { border-color: var(--acc); }
+        .btn-p {
+            width: 100%; padding: 12px; border: none; border-radius: 10px;
+            background: var(--acc); color: #fff; font-weight: 700; cursor: pointer; font-size: 14px;
+        }
+        .change-pass-link {
+            margin-top: 15px; font-size: 12px; color: var(--acc); cursor: pointer; 
+            text-decoration: underline; display: inline-block;
+        }
+        .change-pass-link:hover { color: #2563eb; }
+        .pass-change-box {
+            display: none; margin-top: 20px; padding-top: 20px; 
+            border-top: 1px solid #e2e8f0;
+        }
+        .pass-change-box h3 {
+            font-size: 14px; font-weight: 700; margin-bottom: 15px; color: var(--txt);
+        }
+        .success-msg {
+            background: #ecfdf5; color: var(--grn); padding: 10px; 
+            border-radius: 8px; font-size: 12px; margin-top: 10px; display: none;
+        }
+        .error-msg {
+            background: #fef2f2; color: var(--red); padding: 10px; 
+            border-radius: 8px; font-size: 12px; margin-top: 10px; display: none;
+        }
+
+        /* ANA EKRAN */
+        .app { display: flex; min-height: 100vh; flex-direction: column; }
+        .main { flex: 1; padding: 30px; width: 100%; max-width: 1000px; margin: 0 auto; }
+        
+        .hdr {
+            background: #fff; padding: 20px 30px; border-bottom: 1px solid var(--bdr); border-radius: 16px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
+            box-shadow: var(--sh);
+        }
+        .hdr h2 { font-size: 18px; font-weight: 800; }
+
+        .card { background: var(--card); border-radius: 16px; padding: 25px; box-shadow: var(--sh); margin-bottom: 20px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .stat-val { font-size: 24px; font-weight: 800; margin-top: 5px; }
+        .stat-lbl { font-size: 11px; font-weight: 700; color: var(--txt3); text-transform: uppercase; }
+
+        /* WORKFLOW */
+        .workflow-box { margin-top: 20px; position: relative; padding: 20px 0 40px 0; }
+        .progress-track {
+            position: absolute; top: 35px; left: 5%; right: 5%; height: 6px;
+            background: #e2e8f0; border-radius: 10px; z-index: 1;
+        }
+        .progress-fill {
+            height: 100%; background: var(--grn); border-radius: 10px;
+            width: 0%; transition: width 1s ease-in-out;
+        }
+        .steps { position: relative; z-index: 2; display: flex; justify-content: space-between; }
+        
+        .step-item { display: flex; flex: 1; flex-direction: column; align-items: center; position: relative; }
+        
+        .step-dot {
+            width: 34px; height: 34px; border-radius: 50%; background: #fff;
+            border: 3px solid #e2e8f0; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 12px; transition: 0.3s;
+        }
+        .step-item.active .step-dot { border-color: var(--grn); background: var(--grn); color: #fff; }
+        .step-label {
+            margin-top: 12px; font-size: 11px; font-weight: 700; text-align: center;
+            color: var(--txt3); line-height: 1.3;
+        }
+        .step-item.active .step-label { color: var(--txt); }
+        .status-msg {
+            background: #f8fafc; padding: 15px; border-radius: 12px;
+            text-align: center; font-size: 14px; font-weight: 500; color: var(--txt2);
+            margin-top: 20px;
+        }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 11px; color: var(--txt3); text-transform: uppercase; padding: 12px; border-bottom: 1px solid var(--bdr); }
+        td { padding: 15px 12px; font-size: 14px; border-bottom: 1px solid #fafafa; vertical-align: middle; }
+        .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; }
+        .b-wait { background: #fffbeb; color: var(--amb); }
+
+        /* ─── MODAL (POPUP) STYLES ─── */
+        .modal {
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background-color: #fff; margin: 3% auto; padding: 30px; border-radius: 16px;
+            width: 90%; max-width: 900px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            position: relative; max-height: 85vh; overflow-y: auto;
+        }
+        .close-btn {
+            position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; z-index: 10;
+        }
+        .close-btn:hover { color: #000; }
+        
+        .print-btn {
+            display: block; width: 100%; background: var(--sb); color: #fff; padding: 12px; 
+            border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 20px;
+            text-align: center; text-decoration: none;
+        }
+        .print-btn:hover { background: var(--sb2); }
+
+        /* ─── FOTOĞRAF GRİD & VİEWER ─── */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .photo-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8fafc;
+            border: 3px solid transparent;
+            transition: transform 0.2s;
+        }
+        .photo-item.selected {
+            border-color: var(--grn);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+        .photo-item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+            cursor: zoom-in; /* İmleç büyüteç */
+        }
+        
+        /* Seçim Kutucuğu (Sağ Üst) */
+        .photo-select-action {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(225deg, rgba(0,0,0,0.5) 0%, transparent 70%);
+        }
+        .photo-select-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            border: 2px solid #fff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        /* Seçili ise yeşil yap */
+        .photo-item.selected .photo-select-badge {
+            background: var(--grn);
+            border-color: var(--grn);
+        }
+        .photo-name {
+            padding: 10px;
+            font-size: 11px;
+            color: var(--txt2);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 600;
+        }
+
+        /* --- BÜYÜK RESİM GÖRÜNTÜLEYİCİ (LIGHTBOX) --- */
+        .photo-viewer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+        }
+        .photo-viewer img {
+            max-width: 95%;
+            max-height: 90%;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            cursor: default;
+        }
+        .photo-viewer-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        .photo-viewer-close:hover { opacity: 1; }
+
+        .selection-info {
+            background: #ecfdf5;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .selection-count {
+            font-weight: 700;
+            color: var(--grn);
+            font-size: 16px;
+        }
+        .save-selection-btn {
+            background: var(--grn);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .save-selection-btn:hover {
+            background: #059669;
+        }
+        .save-selection-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--txt3);
+            font-size: 14px;
+        }
+
+        .selected-photos-display {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--txt2);
+            line-height: 1.6;
+        }
+
+        /* ─── SÖZLEŞME İÇERİK TASARIMI ─── */
+        .ct-print-area { padding: 10px; }
+        .ct-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+        .ct-logo { font-size: 20px; font-weight: 800; color: #000; }
+        .ct-logo span { display: block; font-size: 12px; font-weight: 500; color: #555; }
+        
+        .ct-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding-bottom: 8px; margin-bottom: 8px; }
+        .ct-row:last-child { border-bottom: none; }
+        
+        .ct-lbl { color: #555; font-size: 13px; font-weight: 700; width: 40%; }
+        .ct-val { color: #000; font-size: 14px; font-weight: 600; text-align: right; width: 60%; }
+        
+        .ct-box { border: 1px solid #000; padding: 15px; margin-top: 20px; }
+        .ct-title { font-size: 14px; font-weight: 800; color: #000; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+        .ct-text { font-size: 13px; color: #000; line-height: 1.6; white-space: pre-line; text-align: justify; }
+
+        /* ─── YAZDIRMA (PRINT) MODE - DÜZELTİLDİ ─── */
+        @media print {
+            body * { visibility: hidden; } /* Her şeyi gizle */
+            #contractModal { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                height: auto; 
+                margin: 0; 
+                padding: 0; 
+                background: white; 
+                display: block !important; 
+                visibility: visible !important;
+                z-index: 99999;
+            }
+            .modal-content {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                visibility: visible !important;
+            }
+            .ct-print-area, .ct-print-area * { visibility: visible !important; }
+            .print-btn, .close-btn { display: none !important; }
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 768px) {
+            .main { padding: 15px; }
+            .hdr { flex-direction: column; gap: 15px; text-align: center; padding: 20px; align-items: stretch; }
+            .hdr button { width: 100%; }
+            .stat-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 15px; }
+            .card { padding: 20px; margin-bottom: 15px; }
+            
+            /* Table Responsive */
+            table, thead, tbody, th, td, tr { display: block; }
+            thead { display: none; }
+            tr { margin-bottom: 15px; border: 1px solid var(--bdr); border-radius: 12px; padding: 10px; background: #fafafa; }
+            td { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; }
+            td:last-child { border-bottom: none; }
+            td::before {
+                content: attr(data-label);
+                font-weight: 700; color: var(--txt3); font-size: 11px; text-transform: uppercase;
+                text-align: left; margin-right: 15px;
+            }
+
+            .photo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 10px;
+            }
+            .photo-item img {
+                height: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="photoViewer" class="photo-viewer" onclick="closePhotoViewer()">
+    <span class="photo-viewer-close">&times;</span>
+    <img id="viewerImg" src="" alt="Tam Ekran" onclick="event.stopPropagation()">
+</div>
+
+<div class="login-screen" id="loginScreen">
+    <div class="login-box">
+        <div class="login-logo-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <h2>The Creative Co.</h2>
+        <p>Giriş Bilgilerinizle Oturum Açın</p>
+        
+        <form onsubmit="handleCustomLogin(event)">
+            <div class="fg">
+                <label>Kullanıcı Adı</label>
+                <input type="text" id="userInput" placeholder="örn: The Creative Co." required>
+            </div>
+            <div class="fg">
+                <label>Şifre</label>
+                <input type="password" id="passInput" placeholder="••••••" required>
+            </div>
+            <button type="submit" class="btn-p" id="loginBtn">Sisteme Giriş Yap</button>
+        </form>
+        <div id="loginError" style="color:var(--red); font-size:12px; margin-top:15px; display:none;"></div>
+        
+        <div style="text-align:center;">
+            <span class="change-pass-link" onclick="togglePasswordChange()">🔐 Şifremi Değiştir</span>
+        </div>
+
+        <!-- ŞİFRE DEĞİŞTİRME BÖLÜMÜ -->
+        <div class="pass-change-box" id="passChangeBox">
+            <h3>Şifre Değiştir</h3>
+            <form onsubmit="handlePasswordChange(event)">
+                <div class="fg">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="changeUsername" placeholder="Kullanıcı adınız" required>
+                </div>
+                <div class="fg">
+                    <label>Şu Anki Şifre</label>
+                    <input type="password" id="currentPass" placeholder="Mevcut şifreniz" required>
+                </div>
+                <div class="fg">
+                    <label>Yeni Şifre</label>
+                    <input type="password" id="newPass" placeholder="Yeni şifreniz (min. 6 karakter)" minlength="6" required>
+                </div>
+                <div class="fg">
+                    <label>Yeni Şifre Tekrar</label>
+                    <input type="password" id="newPassConfirm" placeholder="Yeni şifrenizi tekrar girin" required>
+                </div>
+                <button type="submit" class="btn-p" id="changePassBtn" style="background:var(--grn)">Şifreyi Güncelle</button>
+            </form>
+            <div class="success-msg" id="passSuccessMsg"></div>
+            <div class="error-msg" id="passErrorMsg"></div>
+        </div>
+    </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none">
+    <main class="main">
+        <header class="hdr">
+            <h2 id="welcomeTxt">Hoş Geldiniz</h2>
+            <button class="btn-p" style="width:auto; padding:8px 20px; background:var(--sb)" onclick="doLogout()">Çıkış Yap</button>
+        </header>
+
+        <div class="stat-grid">
+            <div class="card">
+                <div class="stat-lbl">Anlaşma Tutarı</div>
+                <div class="stat-val" id="totalPrice">₺0</div>
+            </div>
+            <div class="card">
+                <div class="stat-lbl">Ödenen</div>
+                <div class="stat-val" style="color:var(--grn)" id="paidPrice">₺0</div>
+            </div>
+            <div class="card">
+                <div class="stat-lbl">Kalan Borç</div>
+                <div class="stat-val" style="color:var(--red)" id="debtPrice">₺0</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="font-size:16px; margin-bottom:20px;">🎬 İş Akış Süreciniz</h3>
+            <div class="workflow-box">
+                <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+                <div class="steps" id="stepsContainer"></div>
+            </div>
+            <div class="status-msg" id="statusMsg">Durum bilgisi bekleniyor...</div>
+        </div>
+
+        <div class="card">
+            <h3 style="font-size:16px; margin-bottom:15px;">📸 Fotoğraflarım</h3>
+            <p style="font-size:13px; color:var(--txt2); margin-bottom:15px;">
+                Çekim fotoğraflarınızı görüntüleyin ve beğendiğiniz en fazla 35 fotoğrafı seçin.
+            </p>
+            <button class="btn-p" onclick="openPhotosModal()">Fotoğrafları Görüntüle ve Seç</button>
+            
+            <div id="selectedPhotosInfo" style="display:none">
+                <div class="selected-photos-display">
+                    <strong style="color:var(--grn)">✓ Seçili Fotoğraflar:</strong><br>
+                    <span id="selectedPhotosList"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="font-size:16px; margin-bottom:15px;">📅 Çekim Detayları</h3>
+            <table>
+                <thead><tr><th>Tarih / Saat</th><th>Paket</th><th>Konum</th><th>Durum</th></tr></thead>
+                <tbody id="sessionRow"></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3 style="font-size:16px; margin-bottom:15px;">💸 Ödeme Geçmişi</h3>
+            <table>
+                <thead><tr><th>Tarih</th><th>Açıklama</th><th>Tutar</th></tr></thead>
+                <tbody id="paymentHistoryRow">
+                    <tr><td colspan="3" style="text-align:center; color:var(--txt3)">Yükleniyor...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card" id="contractCard" style="display:none">
+            <h3 style="font-size:16px; margin-bottom:15px;">📄 Sözleşme & Hizmet Detayları</h3>
+            <p style="font-size:13px; color:var(--txt2); margin-bottom:15px;">
+                Hizmetinize ait sözleşme ve detayları görüntülemek veya yazdırmak için aşağıdaki butonu kullanabilirsiniz.
+            </p>
+            <button class="btn-p" onclick="openContractModal()">Sözleşmeyi Görüntüle</button>
+        </div>
+
+    </main>
+</div>
+
+<div id="contractModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeContractModal()">&times;</span>
+        <div class="ct-print-area" id="printableContract"></div>
+        <button class="print-btn" onclick="window.print()">🖨️ Bu Sayfayı Yazdır</button>
+    </div>
+</div>
+
+<div id="photosModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closePhotosModal()">&times;</span>
+        <h2 style="font-weight:800; margin-bottom:20px;">📸 Fotoğraflarım</h2>
+        
+        <div class="selection-info">
+            <div>
+                <span class="selection-count" id="selectionCount">0/35</span>
+                <span style="font-size:13px; color:var(--txt3); margin-left:8px;">fotoğraf seçildi</span>
+            </div>
+            <button class="save-selection-btn" onclick="saveSelectedPhotos()" id="saveBtn" disabled>
+                Seçimi Kaydet
+            </button>
+        </div>
+
+        <div id="photosContainer">
+            <div class="loading-spinner">Fotoğraflar yükleniyor...</div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+    // The Creative Co. Müşteri Paneli - Merkezi API (https://pasov.art/api.php) Entegrasyonu
+    let currentClientData = null;
+    let currentClientDocId = null;
+    let selectedPhotos = [];
+    const MAX_PHOTOS = 35;
+
+    // Yönetici paneliyle AYNI veritabanı API'si
+    const API_URL = 'https://pasov.art/api.php'; 
+
+    window.onload = function() {
+        const savedDocId = localStorage.getItem('The Creative Co._client_id');
+        if(savedDocId) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'flex';
+            loadAllData(savedDocId);
+        }
+    };
+
+    // ─── VERİ ÇEKME & GİRİŞ İŞLEMLERİ ───
+    async function handleCustomLogin(e) {
+        e.preventDefault();
+        const username = document.getElementById('userInput').value.trim();
+        const pass = document.getElementById('passInput').value.trim();
+        const btn = document.getElementById('loginBtn');
+        const err = document.getElementById('loginError');
+
+        btn.innerText = "Kontrol ediliyor...";
+        btn.disabled = true;
+        err.style.display = 'none';
+
+        try {
+            // Müşterileri çek ve giriş bilgilerini doğrula
+            const res = await fetch(`${API_URL}?collection=clients&t=${Date.now()}`);
+            if(!res.ok) throw new Error("Sunucuya ulaşılamadı.");
+            const clients = await res.json();
+            
+            const user = clients.find(c => c.username === username && c.password === pass);
+            
+            if (user) {
+                localStorage.setItem('The Creative Co._client_id', user.id);
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                loadAllData(user.id);
+            } else {
+                throw new Error("Kullanıcı adı veya şifre hatalı.");
+            }
+        } catch (error) {
+            btn.innerText = "Sisteme Giriş Yap";
+            btn.disabled = false;
+            err.style.display = 'block';
+            err.innerText = error.message || "Bilgiler hatalı. Lütfen kontrol edin.";
+        }
+    }
+
+    async function loadAllData(clientId) {
+        currentClientDocId = clientId;
+        
+        try {
+            // Yönetici panelindeki gibi tüm ilgili koleksiyonları çek
+            const [clientsRes, sessionsRes, incomesRes, contractsRes] = await Promise.all([
+                fetch(`${API_URL}?collection=clients&t=${Date.now()}`),
+                fetch(`${API_URL}?collection=sessions&t=${Date.now()}`),
+                fetch(`${API_URL}?collection=incomes&t=${Date.now()}`),
+                fetch(`${API_URL}?collection=contracts&t=${Date.now()}`)
+            ]);
+
+            const clients = await clientsRes.json();
+            const sessions = await sessionsRes.json();
+            const incomes = await incomesRes.json();
+            const contracts = await contractsRes.json();
+
+            // Müşteriyi bul
+            const client = clients.find(c => String(c.id) === String(clientId));
+            if (!client) {
+                doLogout();
+                return;
+            }
+
+            // İlgili verileri eşleştir
+            const session = sessions.find(s => String(s.cid) === String(clientId)) || {};
+            const contract = contracts.find(c => String(c.cid) === String(clientId)) || null;
+            
+            // Ödemeleri eşleştir (Yönetici paneli isme veya telefona göre ödeme kaydediyor)
+            const cleanPhone = (client.phone || "").replace(/\s/g, '');
+            const payments = incomes.filter(inc => {
+                const desc = (inc.desc || "").toLowerCase();
+                return (cleanPhone && desc.includes(cleanPhone)) || desc.includes((client.name || "").toLowerCase());
+            });
+
+            renderDashboard(client, session, payments, contract);
+
+        } catch(err) {
+            console.error("Veri çekme hatası:", err);
+            doLogout();
+        }
+    }
+
+    // ─── ANA RENDER FONKSİYONU ───
+    function renderDashboard(clientData, sessionData, paymentsData, contractData) {
+        currentClientData = clientData;
+        
+        document.getElementById('welcomeTxt').innerText = `Hoş Geldin, ${clientData.name || 'Misafir'} 👋`;
+        
+        const total = Number(clientData.total) || 0;
+        const paid = Number(clientData.paid) || 0;
+        document.getElementById('totalPrice').innerText = `₺${total.toLocaleString('tr-TR')}`;
+        document.getElementById('paidPrice').innerText = `₺${paid.toLocaleString('tr-TR')}`;
+        document.getElementById('debtPrice').innerText = `₺${(total - paid).toLocaleString('tr-TR')}`;
+
+        // İŞ AKIŞI MANTIĞI
+        const sessionPkg = sessionData.pkg || "";
+        let stepsArray = [];
+        if (sessionPkg.toLowerCase().includes("düğün")) {
+            stepsArray = ["Çekim", "Yedekleme", "Montaj", "Teslimata Hazır", "Teslim Edildi"];
+        } else {
+            stepsArray = ["Çekim", "Yedekleme", "Düzenleme", "Baskı", "Teslimata Hazır", "Teslim Edildi"];
+        }
+
+        let currentStage = Number(clientData.stage) || 1;
+        if(currentStage > stepsArray.length) currentStage = stepsArray.length;
+
+        const stepsContainer = document.getElementById('stepsContainer');
+        stepsContainer.innerHTML = ""; 
+
+        stepsArray.forEach((stepName, index) => {
+            const stepNum = index + 1;
+            const isActive = stepNum <= currentStage ? "active" : "";
+            const stepHtml = `
+                <div class="step-item ${isActive}">
+                    <div class="step-dot">${stepNum}</div>
+                    <div class="step-label">${stepName}</div>
+                </div>
+            `;
+            stepsContainer.innerHTML += stepHtml;
+        });
+
+        const totalSteps = stepsArray.length;
+        let progressPercent = 0;
+        if (totalSteps > 1) {
+            progressPercent = ((currentStage - 1) / (totalSteps - 1)) * 100;
+        } else {
+            progressPercent = currentStage === 1 ? 100 : 0;
+        }
+        document.getElementById('progressFill').style.width = progressPercent + "%";
+
+        if (currentStage === totalSteps) {
+            document.getElementById('statusMsg').innerText = "🎉 Süreç başarıyla tamamlandı, iyi günlerde kullanın!";
+        } else {
+            const currentStepName = stepsArray[currentStage - 1]; 
+            document.getElementById('statusMsg').innerText = `Şu anki durum: ${currentStepName}`;
+        }
+
+        // ÇEKİM DETAYLARI
+        const displayDate = sessionData.date ? sessionData.date + (sessionData.time ? ' ' + sessionData.time : '') : '-';
+        document.getElementById('sessionRow').innerHTML = `
+            <tr>
+                <td data-label="Tarih / Saat"><strong>${displayDate}</strong></td>
+                <td data-label="Paket">${sessionData.pkg || '-'}</td>
+                <td data-label="Konum">${sessionData.loc || '-'}</td>
+                <td data-label="Durum"><span class="badge b-wait">${sessionData.status || 'Planlanıyor'}</span></td>
+            </tr>
+        `;
+
+        // ÖDEME GEÇMİŞİ ve SÖZLEŞME render işlemleri
+        renderPayments(clientData, paymentsData, sessionData);
+        renderContract(clientData, contractData, sessionData);
+
+        // SEÇİLİ FOTOĞRAFLARI GÖSTER
+        if (clientData.selectedPhotos && clientData.selectedPhotos.length > 0) {
+            selectedPhotos = clientData.selectedPhotos;
+            displaySelectedPhotosInfo();
+        }
+    }
+
+function renderPayments(clientData, payments, sessionData) {
+        // Hatalı "İlk Kapora" ekleme mantığı tamamen kaldırıldı.
+        // Artık sadece veritabanından (incomes) gelen gerçek ödemeler listelenecek.
+
+        // Ödemeleri tarihe göre en yeniden eskiye sırala
+        payments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const tbody = document.getElementById('paymentHistoryRow');
+        if (payments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--txt3)">Henüz ödeme kaydı bulunamadı.</td></tr>';
+            return;
+        }
+
+        let html = "";
+        payments.forEach(p => {
+            const d = new Date(p.date);
+            const dateStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+            html += `
+                <tr>
+                    <td data-label="Tarih"><strong>${dateStr}</strong></td>
+                    <td data-label="Açıklama">${p.desc}</td>
+                    <td data-label="Tutar" style="color:var(--grn); font-weight:700">₺${Number(p.amt).toLocaleString('tr-TR')}</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+    
+    function renderContract(clientData, contractData, sessionData) {
+        if (contractData) {
+            const total = Number(contractData.total) || 0;
+            const paid = Number(contractData.paid) || 0;
+            const remaining = total - paid;
+            const dateStr = contractData.date ? new Date(contractData.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+
+            const htmlContent = `
+                <div class="ct-header">
+                    <div class="ct-logo">The Creative Co.<span>Prodüksiyon</span></div>
+                    <div style="font-size:12px; color:#555">${dateStr}</div>
+                </div>
+
+                <div class="ct-row"><span class="ct-lbl">Müşteri Adı:</span><span class="ct-val">${clientData.name}</span></div>
+                <div class="ct-row"><span class="ct-lbl">Telefon:</span><span class="ct-val">${clientData.phone || '-'}</span></div>
+
+                <div class="ct-box">
+                    <div class="ct-title">Hizmet Detayları</div>
+                    <div class="ct-text">${(contractData.terms || `Hizmet: ${sessionData.pkg || '-'}\nLokasyon: ${sessionData.loc || '-'}`).replace(/\n/g, '<br>')}</div>
+                </div>
+
+                <div class="ct-box">
+                    <div class="ct-title">Ödeme Tablosu</div>
+                    <div class="ct-row"><span class="ct-lbl">Toplam Tutar:</span><span class="ct-val">₺${total.toLocaleString('tr-TR')}</span></div>
+                    <div class="ct-row"><span class="ct-lbl">Alınan Kapora:</span><span class="ct-val">₺${paid.toLocaleString('tr-TR')}</span></div>
+                    <div class="ct-row"><span class="ct-lbl">Kalan Bakiye:</span><span class="ct-val" style="font-weight:800">₺${remaining.toLocaleString('tr-TR')}</span></div>
+                </div>
+
+                <div style="font-size:11px; color:#555; margin-top:20px; text-align:justify; line-height:1.4">
+                    İşbu sözleşme taraflar arasında yukarıda belirtilen şartlar dahilinde düzenlenmiştir.
+                    Hizmet alan kişi, çekim tarihinden en geç 3 gün öncesine kadar iptal hakkına sahiptir. 
+                    Kapora iadesi mücbir sebepler dışında yapılmamaktadır.
+                </div>
+            `;
+
+            document.getElementById('contractCard').style.display = 'block';
+            document.getElementById('printableContract').innerHTML = htmlContent;
+        } else {
+            document.getElementById('contractCard').style.display = 'none';
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // FOTOĞRAF MODAL & VIEWER FONKSİYONLARI
+    // ═══════════════════════════════════════════════════════
+
+    function openPhotosModal() {
+        if (!currentClientData || !currentClientData.driveFolder) {
+            alert('Fotoğraf klasörü henüz tanımlanmamış. Lütfen yöneticiyle iletişime geçin.');
+            return;
+        }
+
+        document.getElementById('photosModal').style.display = 'block';
+        document.getElementById('photosContainer').innerHTML = '<div class="loading-spinner">Fotoğraflar yükleniyor...</div>';
+        
+        loadPhotosFromDrive(currentClientData.driveFolder);
+    }
+
+    function closePhotosModal() {
+        document.getElementById('photosModal').style.display = 'none';
+    }
+
+    function viewPhoto(url) {
+        const viewer = document.getElementById('photoViewer');
+        const img = document.getElementById('viewerImg');
+        img.src = url;
+        viewer.style.display = 'flex';
+    }
+
+    function closePhotoViewer() {
+        document.getElementById('photoViewer').style.display = 'none';
+        document.getElementById('viewerImg').src = '';
+    }
+
+    async function loadPhotosFromDrive(driveLink) {
+        try {
+            const folderId = extractFolderId(driveLink);
+            if (!folderId) throw new Error('Geçersiz Drive klasör linki');
+
+            const photos = await fetchDrivePhotos(folderId);
+            
+            if (photos.length === 0) {
+                document.getElementById('photosContainer').innerHTML = '<div class="loading-spinner">Bu klasörde henüz fotoğraf bulunmuyor.</div>';
+                return;
+            }
+
+            let html = '<div class="photo-grid">';
+            photos.forEach(photo => {
+                const isSelected = selectedPhotos.includes(photo.name);
+                const selectedIndex = isSelected ? selectedPhotos.indexOf(photo.name) + 1 : '';
+                const largeUrl = photo.thumbnailUrl.replace(/=w400/, '=w1920-h1080');
+
+                html += `
+                    <div class="photo-item ${isSelected ? 'selected' : ''}" id="pitem-${photo.id}">
+                        <img src="${photo.thumbnailUrl}" alt="${photo.name}" loading="lazy" onclick="viewPhoto('${largeUrl}')"/>
+                        
+                        <div class="photo-select-action" onclick="togglePhotoSelection('${photo.name.replace(/'/g, "\\'")}', '${photo.id}')">
+                            <div class="photo-select-badge">${selectedIndex || '✓'}</div>
+                        </div>
+                        
+                        <div class="photo-name">${photo.name}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            document.getElementById('photosContainer').innerHTML = html;
+            updateSelectionCount();
+        } catch (error) {
+            document.getElementById('photosContainer').innerHTML = '<div class="loading-spinner" style="color:var(--red)">Fotoğraflar yüklenirken hata oluştu. Lütfen tekrar deneyin.</div>';
+            console.error(error);
+        }
+    }
+
+    function extractFolderId(driveLink) {
+        const match = driveLink.match(/folders\/([a-zA-Z0-9-_]+)/);
+        return match ? match[1] : null;
+    }
+
+    async function fetchDrivePhotos(folderId) {
+        const apiKey = 'AIzaSyDiFhYIRjFUtIAScAk5MNKgOMWtqEQY-JI'; // Drive API Key
+        const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image'&key=${apiKey}&fields=files(id,name,thumbnailLink,webContentLink)&pageSize=1000`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!data.files) return [];
+
+        return data.files.map(file => ({
+            id: file.id,
+            name: file.name,
+            thumbnailUrl: file.thumbnailLink ? file.thumbnailLink.replace(/=s\d+/, '=w400') : `https://drive.google.com/thumbnail?id=${file.id}&sz=w400`,
+            downloadUrl: file.webContentLink
+        }));
+    }
+
+    function togglePhotoSelection(photoName, elementId) {
+        const index = selectedPhotos.indexOf(photoName);
+        
+        if (index > -1) {
+            selectedPhotos.splice(index, 1);
+        } else {
+            if (selectedPhotos.length >= MAX_PHOTOS) {
+                alert(`Maksimum ${MAX_PHOTOS} fotoğraf seçebilirsiniz!`);
+                return;
+            }
+            selectedPhotos.push(photoName);
+        }
+
+        refreshSelectionBadges();
+        updateSelectionCount();
+    }
+
+    function refreshSelectionBadges() {
+        const items = document.querySelectorAll('.photo-item');
+        items.forEach(item => {
+            const name = item.querySelector('.photo-name').textContent;
+            const index = selectedPhotos.indexOf(name);
+            const badge = item.querySelector('.photo-select-badge');
+            
+            if (index > -1) {
+                item.classList.add('selected');
+                badge.textContent = index + 1;
+            } else {
+                item.classList.remove('selected');
+                badge.textContent = '✓';
+            }
+        });
+    }
+
+    function updateSelectionCount() {
+        document.getElementById('selectionCount').textContent = `${selectedPhotos.length}/${MAX_PHOTOS}`;
+        document.getElementById('saveBtn').disabled = selectedPhotos.length === 0;
+    }
+
+    // FOTOĞRAF SEÇİMİNİ KAYDETME (Yönetici Paneli API'sine Gönderim)
+    function saveSelectedPhotos() {
+        if (!currentClientDocId || selectedPhotos.length === 0) return;
+
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Kaydediliyor...';
+
+        currentClientData.selectedPhotos = selectedPhotos;
+
+        fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'save',
+                collection: 'clients',
+                id: currentClientDocId,
+                data: currentClientData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            displaySelectedPhotosInfo();
+            closePhotosModal();
+            alert('Seçiminiz başarıyla kaydedildi! ✓');
+        })
+        .catch(error => {
+            console.error('Kayıt hatası:', error);
+            alert('Kayıt sırasında hata oluştu. Lütfen tekrar deneyin.');
+        })
+        .finally(() => {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Seçimi Kaydet';
+        });
+    }
+
+    function displaySelectedPhotosInfo() {
+        if (selectedPhotos.length > 0) {
+            document.getElementById('selectedPhotosInfo').style.display = 'block';
+            document.getElementById('selectedPhotosList').textContent = selectedPhotos.join(', ');
+        } else {
+            document.getElementById('selectedPhotosInfo').style.display = 'none';
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SÖZLEŞME & ÇIKIŞ
+    // ═══════════════════════════════════════════════════════
+
+    function openContractModal() {
+        document.getElementById('contractModal').style.display = 'block';
+    }
+    
+    function closeContractModal() {
+        document.getElementById('contractModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const contractModal = document.getElementById('contractModal');
+        const photosModal = document.getElementById('photosModal');
+        
+        if (event.target == contractModal) contractModal.style.display = "none";
+        if (event.target == photosModal) photosModal.style.display = "none";
+    }
+
+    function doLogout() {
+        localStorage.removeItem('The Creative Co._client_id');
+        location.reload();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ŞİFRE DEĞİŞTİRME 
+    // ═══════════════════════════════════════════════════════
+
+    function togglePasswordChange() {
+        const box = document.getElementById('passChangeBox');
+        if (box.style.display === 'none' || box.style.display === '') {
+            box.style.display = 'block';
+            document.getElementById('changeUsername').value = '';
+            document.getElementById('currentPass').value = '';
+            document.getElementById('newPass').value = '';
+            document.getElementById('newPassConfirm').value = '';
+            document.getElementById('passSuccessMsg').style.display = 'none';
+            document.getElementById('passErrorMsg').style.display = 'none';
+        } else {
+            box.style.display = 'none';
+        }
+    }
+
+    async function handlePasswordChange(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('changeUsername').value.trim();
+        const currentPass = document.getElementById('currentPass').value.trim();
+        const newPass = document.getElementById('newPass').value.trim();
+        const newPassConfirm = document.getElementById('newPassConfirm').value.trim();
+        
+        const btn = document.getElementById('changePassBtn');
+        const successMsg = document.getElementById('passSuccessMsg');
+        const errorMsg = document.getElementById('passErrorMsg');
+        
+        successMsg.style.display = 'none';
+        errorMsg.style.display = 'none';
+        
+        if (!username) {
+            errorMsg.innerText = 'Lütfen kullanıcı adınızı girin.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        if (newPass.length < 6) {
+            errorMsg.innerText = 'Yeni şifre en az 6 karakter olmalıdır.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        if (newPass !== newPassConfirm) {
+            errorMsg.innerText = 'Yeni şifreler eşleşmiyor. Lütfen kontrol edin.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        if (currentPass === newPass) {
+            errorMsg.innerText = 'Yeni şifre eskisiyle aynı olamaz.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        btn.innerText = "Güncelleniyor...";
+        btn.disabled = true;
+        
+        try {
+            // Müşteriyi bul ve doğrula
+            const res = await fetch(`${API_URL}?collection=clients&t=${Date.now()}`);
+            if(!res.ok) throw new Error("Sunucuya ulaşılamıyor.");
+            const clients = await res.json();
+            
+            const user = clients.find(c => c.username === username && c.password === currentPass);
+            
+            if (!user) {
+                throw new Error("Mevcut şifre veya kullanıcı adı hatalı.");
+            }
+
+            // Şifreyi objede güncelle ve API'ye gönder
+            user.password = newPass;
+            
+            const updateRes = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'save',
+                    collection: 'clients',
+                    id: user.id,
+                    data: user
+                })
+            });
+
+            if (!updateRes.ok) throw new Error("Kayıt sırasında hata oluştu.");
+
+            successMsg.innerText = '✓ Şifreniz başarıyla güncellendi!';
+            successMsg.style.display = 'block';
+            
+            document.getElementById('changeUsername').value = '';
+            document.getElementById('currentPass').value = '';
+            document.getElementById('newPass').value = '';
+            document.getElementById('newPassConfirm').value = '';
+            
+            setTimeout(() => { togglePasswordChange(); }, 2000);
+
+        } catch (err) {
+            errorMsg.innerText = err.message || "Bir hata oluştu. Lütfen tekrar deneyin.";
+            errorMsg.style.display = 'block';
+        } finally {
+            btn.innerText = "Şifreyi Güncelle";
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

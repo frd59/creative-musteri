@@ -168,50 +168,7 @@
             cursor: zoom-in; /* İmleç büyüteç */
         }
         
-        /* Seçim Kutucuğu (Sağ Üst) */
-        .photo-select-action {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            z-index: 5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(225deg, rgba(0,0,0,0.5) 0%, transparent 70%);
-        }
-        .photo-select-badge {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.4);
-            border: 2px solid #fff;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 13px;
-            transition: all 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        /* Seçili ise yeşil yap */
-        .photo-item.selected .photo-select-badge {
-            background: var(--grn);
-            border-color: var(--grn);
-        }
-        .photo-name {
-            padding: 10px;
-            font-size: 11px;
-            color: var(--txt2);
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-weight: 600;
-        }
+      
 
         /* --- BÜYÜK RESİM GÖRÜNTÜLEYİCİ (LIGHTBOX) --- */
         .photo-viewer {
@@ -243,15 +200,7 @@
         }
         .photo-viewer-close:hover { opacity: 1; }
 
-        .selection-info {
-            background: #ecfdf5;
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+       
         .selection-count {
             font-weight: 700;
             color: var(--grn);
@@ -366,6 +315,26 @@
                 height: 140px;
             }
         }
+
+
+/* Klasör Görünümü */
+        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .folder-item { background: #f8fafc; border: 1px solid var(--bdr); border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .folder-item:hover { background: #f1f5f9; border-color: var(--acc2); transform: translateY(-2px); }
+        .folder-icon { font-size: 40px; margin-bottom: 10px; }
+        .folder-name { font-size: 13px; font-weight: 700; color: var(--txt); word-wrap: break-word; }
+        
+        /* İndirme Butonu */
+        .download-action {
+            position: absolute; top: 0; right: 0; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+            border-bottom-left-radius: 12px; text-decoration: none; z-index: 5; transition: 0.2s;
+        }
+        .download-action:hover { background: var(--acc); }
+        .download-action svg { width: 18px; height: 18px; stroke: #fff; }
+
+
+        
     </style>
 </head>
 <body>
@@ -459,12 +428,13 @@
             <div class="status-msg" id="statusMsg">Durum bilgisi bekleniyor...</div>
         </div>
 
-        <div class="card">
-            <h3 style="font-size:16px; margin-bottom:15px;">📸 Fotoğraflarım</h3>
+       <div class="card">
+            <h3 style="font-size:16px; margin-bottom:15px;">📂 İçeriklerim</h3>
             <p style="font-size:13px; color:var(--txt2); margin-bottom:15px;">
-                Çekim fotoğraflarınızı görüntüleyin ve beğendiğiniz en fazla 35 fotoğrafı seçin.
+                Ajansımız tarafından sizin için hazırlanan tüm görsel ve video içeriklerine buradan erişebilir, tarih/konsept klasörlerine göre görüntüleyip cihazınıza indirebilirsiniz.
             </p>
-            <button class="btn-p" onclick="openPhotosModal()">Fotoğrafları Görüntüle ve Seç</button>
+            <button class="btn-p" onclick="openContentsModal()">İçeriklerimi Görüntüle</button>
+        </div>
             
             <div id="selectedPhotosInfo" style="display:none">
                 <div class="selected-photos-display">
@@ -514,20 +484,12 @@
 <div id="photosModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closePhotosModal()">&times;</span>
-        <h2 style="font-weight:800; margin-bottom:20px;">📸 Fotoğraflarım</h2>
+        <h2 style="font-weight:800; margin-bottom:20px;">📂 İçeriklerim</h2>
         
-        <div class="selection-info">
-            <div>
-                <span class="selection-count" id="selectionCount">0/35</span>
-                <span style="font-size:13px; color:var(--txt3); margin-left:8px;">fotoğraf seçildi</span>
-            </div>
-            <button class="save-selection-btn" onclick="saveSelectedPhotos()" id="saveBtn" disabled>
-                Seçimi Kaydet
-            </button>
-        </div>
+        <button id="backToMainBtn" class="btn-p" style="display:none; background:var(--txt2); margin-bottom:15px; width:auto; padding:8px 15px;" onclick="goToMainFolder()">⬅ Ana Klasöre Dön</button>
 
         <div id="photosContainer">
-            <div class="loading-spinner">Fotoğraflar yükleniyor...</div>
+            <div class="loading-spinner">İçerikler yükleniyor...</div>
         </div>
     </div>
 </div>
@@ -780,24 +742,37 @@ function renderPayments(clientData, payments, sessionData) {
         }
     }
 
+// ═══════════════════════════════════════════════════════
+    // KLASÖR VE İÇERİK GÖRÜNTÜLEYİCİ (DRIVE ENTEGRASYONU)
     // ═══════════════════════════════════════════════════════
-    // FOTOĞRAF MODAL & VIEWER FONKSİYONLARI
-    // ═══════════════════════════════════════════════════════
+    
+    let mainDriveFolderId = null; // Ana klasörü hafızada tutarız ki geri dönebilelim
 
-    function openPhotosModal() {
+    function openContentsModal() {
         if (!currentClientData || !currentClientData.driveFolder) {
-            alert('Fotoğraf klasörü henüz tanımlanmamış. Lütfen yöneticiyle iletişime geçin.');
+            alert('İçerik klasörü henüz tanımlanmamış. Lütfen yöneticiyle iletişime geçin.');
+            return;
+        }
+
+        mainDriveFolderId = extractFolderId(currentClientData.driveFolder);
+        if (!mainDriveFolderId) {
+            alert('Geçersiz Drive linki.');
             return;
         }
 
         document.getElementById('photosModal').style.display = 'block';
-        document.getElementById('photosContainer').innerHTML = '<div class="loading-spinner">Fotoğraflar yükleniyor...</div>';
+        document.getElementById('backToMainBtn').style.display = 'none';
         
-        loadPhotosFromDrive(currentClientData.driveFolder);
+        loadContentsFromDrive(mainDriveFolderId);
     }
 
     function closePhotosModal() {
         document.getElementById('photosModal').style.display = 'none';
+    }
+
+    function goToMainFolder() {
+        document.getElementById('backToMainBtn').style.display = 'none';
+        loadContentsFromDrive(mainDriveFolderId);
     }
 
     function viewPhoto(url) {
@@ -812,42 +787,63 @@ function renderPayments(clientData, payments, sessionData) {
         document.getElementById('viewerImg').src = '';
     }
 
-    async function loadPhotosFromDrive(driveLink) {
+    async function loadContentsFromDrive(folderId) {
+        document.getElementById('photosContainer').innerHTML = '<div class="loading-spinner">İçerikler yükleniyor...</div>';
+        
+        // Eğer alt klasördeysek (örn: 24 04 2026) Geri Dön butonunu göster
+        if (folderId !== mainDriveFolderId) {
+            document.getElementById('backToMainBtn').style.display = 'inline-block';
+        }
+        
         try {
-            const folderId = extractFolderId(driveLink);
-            if (!folderId) throw new Error('Geçersiz Drive klasör linki');
-
-            const photos = await fetchDrivePhotos(folderId);
+            const contents = await fetchDriveContents(folderId);
             
-            if (photos.length === 0) {
-                document.getElementById('photosContainer').innerHTML = '<div class="loading-spinner">Bu klasörde henüz fotoğraf bulunmuyor.</div>';
+            if (contents.length === 0) {
+                document.getElementById('photosContainer').innerHTML = '<div class="loading-spinner">Bu klasörde içerik bulunmuyor.</div>';
                 return;
             }
 
-            let html = '<div class="photo-grid">';
-            photos.forEach(photo => {
-                const isSelected = selectedPhotos.includes(photo.name);
-                const selectedIndex = isSelected ? selectedPhotos.indexOf(photo.name) + 1 : '';
-                const largeUrl = photo.thumbnailUrl.replace(/=w400/, '=w1920-h1080');
+            const folders = contents.filter(c => c.isFolder);
+            const files = contents.filter(c => !c.isFolder);
 
-                html += `
-                    <div class="photo-item ${isSelected ? 'selected' : ''}" id="pitem-${photo.id}">
-                        <img src="${photo.thumbnailUrl}" alt="${photo.name}" loading="lazy" onclick="viewPhoto('${largeUrl}')"/>
-                        
-                        <div class="photo-select-action" onclick="togglePhotoSelection('${photo.name.replace(/'/g, "\\'")}', '${photo.id}')">
-                            <div class="photo-select-badge">${selectedIndex || '✓'}</div>
+            let html = '';
+            
+            // 1. Önce Klasörleri Çiz
+            if (folders.length > 0) {
+                html += '<div class="folder-grid">';
+                folders.forEach(folder => {
+                    html += `
+                        <div class="folder-item" onclick="loadContentsFromDrive('${folder.id}')">
+                            <div class="folder-icon">📁</div>
+                            <div class="folder-name">${folder.name}</div>
                         </div>
-                        
-                        <div class="photo-name">${photo.name}</div>
-                    </div>
-                `;
-            });
-            html += '</div>';
+                    `;
+                });
+                html += '</div>';
+            }
+
+            // 2. Sonra Fotoğraf ve Videoları Çiz
+            if (files.length > 0) {
+                html += '<div class="photo-grid">';
+                files.forEach(file => {
+                    const largeUrl = file.thumbnailUrl.replace(/=w400/, '=w1920-h1080');
+                    html += `
+                        <div class="photo-item">
+                            <img src="${file.thumbnailUrl}" alt="${file.name}" loading="lazy" onclick="viewPhoto('${largeUrl}')"/>
+                            <a href="${file.downloadUrl}" target="_blank" class="download-action" title="İndir">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            </a>
+                            <div class="photo-name">${file.name}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
 
             document.getElementById('photosContainer').innerHTML = html;
-            updateSelectionCount();
+
         } catch (error) {
-            document.getElementById('photosContainer').innerHTML = '<div class="loading-spinner" style="color:var(--red)">Fotoğraflar yüklenirken hata oluştu. Lütfen tekrar deneyin.</div>';
+            document.getElementById('photosContainer').innerHTML = '<div class="loading-spinner" style="color:var(--red)">İçerikler yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</div>';
             console.error(error);
         }
     }
@@ -857,107 +853,26 @@ function renderPayments(clientData, payments, sessionData) {
         return match ? match[1] : null;
     }
 
-    async function fetchDrivePhotos(folderId) {
+    async function fetchDriveContents(folderId) {
         const apiKey = 'AIzaSyDiFhYIRjFUtIAScAk5MNKgOMWtqEQY-JI'; // Drive API Key
-        const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image'&key=${apiKey}&fields=files(id,name,thumbnailLink,webContentLink)&pageSize=1000`;
+        // mimeType ayrımı yapmadan o klasörün içindeki her şeyi (Klasör, Video, Foto) çekeriz
+        const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&key=${apiKey}&fields=files(id,name,mimeType,thumbnailLink,webContentLink)&pageSize=1000&orderBy=folder,name`;
 
         const response = await fetch(url);
         const data = await response.json();
 
         if (!data.files) return [];
 
-        return data.files.map(file => ({
-            id: file.id,
-            name: file.name,
-            thumbnailUrl: file.thumbnailLink ? file.thumbnailLink.replace(/=s\d+/, '=w400') : `https://drive.google.com/thumbnail?id=${file.id}&sz=w400`,
-            downloadUrl: file.webContentLink
-        }));
-    }
-
-    function togglePhotoSelection(photoName, elementId) {
-        const index = selectedPhotos.indexOf(photoName);
-        
-        if (index > -1) {
-            selectedPhotos.splice(index, 1);
-        } else {
-            if (selectedPhotos.length >= MAX_PHOTOS) {
-                alert(`Maksimum ${MAX_PHOTOS} fotoğraf seçebilirsiniz!`);
-                return;
-            }
-            selectedPhotos.push(photoName);
-        }
-
-        refreshSelectionBadges();
-        updateSelectionCount();
-    }
-
-    function refreshSelectionBadges() {
-        const items = document.querySelectorAll('.photo-item');
-        items.forEach(item => {
-            const name = item.querySelector('.photo-name').textContent;
-            const index = selectedPhotos.indexOf(name);
-            const badge = item.querySelector('.photo-select-badge');
-            
-            if (index > -1) {
-                item.classList.add('selected');
-                badge.textContent = index + 1;
-            } else {
-                item.classList.remove('selected');
-                badge.textContent = '✓';
-            }
+        return data.files.map(file => {
+            const isFolder = file.mimeType === 'application/vnd.google-apps.folder';
+            return {
+                id: file.id,
+                name: file.name,
+                isFolder: isFolder,
+                thumbnailUrl: file.thumbnailLink ? file.thumbnailLink.replace(/=s\d+/, '=w400') : `https://drive.google.com/thumbnail?id=${file.id}&sz=w400`,
+                downloadUrl: file.webContentLink // Direk indirme bağlantısı
+            };
         });
-    }
-
-    function updateSelectionCount() {
-        document.getElementById('selectionCount').textContent = `${selectedPhotos.length}/${MAX_PHOTOS}`;
-        document.getElementById('saveBtn').disabled = selectedPhotos.length === 0;
-    }
-
-    // FOTOĞRAF SEÇİMİNİ KAYDETME (Yönetici Paneli API'sine Gönderim)
-    function saveSelectedPhotos() {
-        if (!currentClientDocId || selectedPhotos.length === 0) return;
-
-        const saveBtn = document.getElementById('saveBtn');
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'Kaydediliyor...';
-
-        currentClientData.selectedPhotos = selectedPhotos;
-
-        fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'save',
-                collection: 'clients',
-                id: currentClientDocId,
-                data: currentClientData
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            displaySelectedPhotosInfo();
-            closePhotosModal();
-            alert('Seçiminiz başarıyla kaydedildi! ✓');
-        })
-        .catch(error => {
-            console.error('Kayıt hatası:', error);
-            alert('Kayıt sırasında hata oluştu. Lütfen tekrar deneyin.');
-        })
-        .finally(() => {
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Seçimi Kaydet';
-        });
-    }
-
-    function displaySelectedPhotosInfo() {
-        if (selectedPhotos.length > 0) {
-            document.getElementById('selectedPhotosInfo').style.display = 'block';
-            document.getElementById('selectedPhotosList').textContent = selectedPhotos.join(', ');
-        } else {
-            document.getElementById('selectedPhotosInfo').style.display = 'none';
-        }
     }
 
     // ═══════════════════════════════════════════════════════
